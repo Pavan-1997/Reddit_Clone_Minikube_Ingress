@@ -6,7 +6,7 @@
 
 3. Clone the repo
 
-git clone https://github.com/LondheShubham153/reddit-clone-k8s-ingress.git
+git clone https://github.com/Pavan-1997/Reddit_Clone_Minikube_Ingress.git
 
 
 4. Login to DockerHub
