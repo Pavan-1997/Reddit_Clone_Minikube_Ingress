@@ -1,0 +1,161 @@
+1. Create a UBUNTU EC2 Instance in AWS
+
+
+2. Follow the Minikube Instructions in OneNote
+
+
+3. Clone the repo
+
+git clone https://github.com/LondheShubham153/reddit-clone-k8s-ingress.git
+
+
+4. Login to DockerHub
+
+docker login
+(Give username and password)
+
+
+4. Create a Docker Image
+
+docker build . -t pavanraj97/reddit-clone-app
+
+
+5. Push the Docker Image to DockerHub
+
+docker push pavanraj97/reddit-clone-app
+
+
+6. Apply the manifest file
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reddit-clone-deployment
+  labels:
+    app: reddit-clone
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: reddit-clone
+  template:
+    metadata:
+      labels:
+        app: reddit-clone
+    spec:
+      containers:
+      - name: reddit-clone
+        image: pavanraj97/reddit-clone-app
+        ports:
+        - containerPort: 3000
+
+kubectl create -f deployment.yml
+
+
+7. To check the deployments
+
+kubectl get deployments
+
+
+8. Now apply the service 
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: reddit-clone-service
+  labels:
+    app: reddit-clone
+spec:
+  type: NodePort
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 31000
+  selector:
+    app: reddit-clone-app
+
+kubectl create -f service.yml
+
+
+9. Now to access this application on Minikube
+
+minikube service reddit-clone-service --url
+
+
+10. To view the application locally in UBUNTU
+
+curl -L http://172.31.24.145:31000
+
+
+11. To run the application globally
+
+kubectl expose deployment reddit-clone-deployment --type=NodePort
+
+
+12. Now forward the port to 3000
+
+kubectl port-forward svc/reddit-clone-service 3000:3000 --address 0.0.0.0
+
+If getting any error then use below:
+
+apt-get update && apt-get install -y socat
+
+
+13. If you want have the port forwarding running in background
+
+kubectl port-forward svc/reddit-clone-service 3000:3000 --address 0.0.0.0 &
+
+
+14. Configure Ingress
+
+
+14.1. We have to first enable ingress on Minikube
+
+minikube addons enable ingress
+
+
+14.2. To check the addons added
+
+minikube addons list
+
+
+14.3. Create a ingress manifestfile 
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-reddit-app
+spec:
+  rules:
+  - host: "domain.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/test"
+        backend:
+          service:
+            name: reddit-clone-service
+            port:
+              number: 3000
+  - host: "*.domain.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/test"
+        backend:
+          service:
+            name: reddit-clone-service
+            port:
+              number: 3000
+
+kubectl apply -f ingress.yml
+
+
+14.4. Check the ingress resource is running properly
+
+kubectl get ingress ingress-reddit-app
+
+
+15. Test the domain name with Ingress
+
+curl -L domain/test
