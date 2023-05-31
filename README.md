@@ -1,6 +1,6 @@
 # Deploying a Reddit Clone application on Minikube Kubernetes installed on Ubuntu EC2 and also creating a Ingress 
 
-All the steps are documented the CMDs file along with the Petclinic application
+All the steps are documented the CMDs file along with the Reddit Clone application
 
 Accessing the application on Server Public IP followed by the Port Number(3000)
 
